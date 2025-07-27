@@ -1102,6 +1102,8 @@
 
     // --- NEW LEAD CAPTURE FUNCTIONS ---
     // Function to display the lead capture form
+
+    // Function to display the lead capture form
     function showEnrollmentLeadForm(course = null) {
         conversationState.lastTopic = 'Enrollment Inquiry Form'; // Set topic
         clearInputArea();
@@ -1111,20 +1113,51 @@
         }
         appendMessage('ai', introMessage);
 
+        // --- START DEBUGGING LOGS ---
+        console.log("Debugging: data.courses object:", data.courses);
+        // --- END DEBUGGING LOGS ---
+
+        let courseOptionsHtml = `<option value="">-- ${t('findCourse')} --</option>`;
+        for (const classTypeKey in data.courses) {
+            if (data.courses.hasOwnProperty(classTypeKey)) {
+                // --- DEBUGGING LOG ---
+                console.log("Debugging: Processing classTypeKey:", classTypeKey);
+                // --- END DEBUGGING LOG ---
+
+                data.courses[classTypeKey].forEach(courseItem => {
+                    // --- DEBUGGING LOG ---
+                    console.log("Debugging: Processing courseItem:", courseItem);
+                    // --- END DEBUGGING LOG ---
+
+                    const courseValue = courseItem.name && courseItem.name.en ? courseItem.name.en : '';
+                    const courseDisplay = courseItem.name && courseItem.name[currentLanguage] ? courseItem.name[currentLanguage] : courseValue;
+
+                    // --- DEBUGGING LOG ---
+                    console.log(`Debugging: courseValue: ${courseValue}, courseDisplay: ${courseDisplay}`);
+                    // --- END DEBUGGING LOG ---
+
+                    if (courseValue && courseDisplay) { // Only add option if a valid value exists
+                        courseOptionsHtml += `<option value="${courseValue}">${courseDisplay}</option>`;
+                    } else {
+                        // --- DEBUGGING LOG ---
+                        console.warn(`Debugging: Skipping invalid course item. Value: ${courseValue}, Display: ${courseDisplay}, Item:`, courseItem);
+                        // --- END DEBUGGING LOG ---
+                    }
+                });
+            }
+        }
+
+        // --- DEBUGGING LOG ---
+        console.log("Debugging: Final courseOptionsHtml:", courseOptionsHtml);
+        // --- END DEBUGGING LOG ---
+
         const leadFormHtml = `
             <div>
                 <input type="text" id="lead-name" class="contact-form-input" placeholder="${t('yourName')}" required>
                 <input type="email" id="lead-email" class="contact-form-input" placeholder="${t('yourEmail')} (e.g., example@email.com)">
                 <input type="tel" id="lead-phone" class="contact-form-input" placeholder="${t('yourPhoneNumber')}">
                 <select id="lead-course-interest" class="contact-form-input">
-                    <option value="">-- ${t('findCourse')} --</option>
-                    <option value="Normal Class - Basic">${t('Normal Class - Basic', 'en')}</option>
-                    <option value="Normal Class - Level 2">${t('Normal Class - Level 2', 'en')}</option>
-                    <option value="Normal Class - Level 3">${t('Normal Class - Level 3', 'en')}</option>
-                    <option value="Children Class - Basic">${t('Children Class - Basic', 'en')}</option>
-                    <option value="Children Class - Level 2">${t('Children Class - Level 2', 'en')}</option>
-                    <option value="Basic Speaking Class">${t('Basic Speaking Class', 'en')}</option>
-                    <option value="Private Class">${t('Private Class', 'en')}</option>
+                    ${courseOptionsHtml} <!-- This is where the generated HTML goes -->
                 </select>
                 <button id="submit-lead" class="contact-form-submit-btn">${t('submit')}</button>
             </div>
