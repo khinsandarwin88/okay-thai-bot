@@ -661,7 +661,7 @@
 <div id="star-background"></div>
 <div class="app-container">
     <div class="sidebar" id="sidebar">
-        <button id="collapse-btn" title="Collapse Sidebar" aria-label="Collapse Sidebar"> ☰ </button>
+        <button id="collapse-btn" title="Collapse Sidebar"> ☰ </button>
         <div class="sidebar-header">
             <h1>OKay Thai Bot</h1>
             <p>Your AI Buddy</p>
@@ -669,34 +669,914 @@
         <nav class="sidebar-nav" id="sidebar-nav">
             <!-- Buttons populated by JavaScript -->
         </nav>
-        <!-- Facebook link with accessibility and security enhancements -->
-        <a href="https://www.facebook.com/share/1AhRXANLEm/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="action-button facebook-link" aria-label="Visit OKay Thai Facebook page">
+        <!-- Your existing Facebook link - text changed to 'Facebook' -->
+        <a href="https://www.facebook.com/share/1AhRXANLEm/?mibextid=wwXIfr" target="_blank" class="action-button facebook-link">
             <span class="button-icon"> 👀 </span> <span class="button-text">Facebook</span>
         </a>
     </div>
     <div class="chat-window">
         <div class="chat-header">
-            <!-- Move sound button before title for better accessibility -->
-            <div class="top-left-settings">
-                <button class="settings-btn" id="greeting-btn" title="Play Greeting" aria-label="Play Greeting" tabindex="0"> 🔊 </button>
-            </div>
             <div class="header-title">
                 <h1>Chat with OKay Thai</h1>
                 <!-- Marquee text applied to this paragraph -->
                 <p class="greeting-marquee"> မင်္ဂလာပါ။   สวัสดีค่ะ  !  🙏  How can I assist you today?</p>
             </div>
             <div class="top-right-settings">
-                <button class="settings-btn" id="langBtn" title="Language" aria-label="Change Language" tabindex="0">  🌐  </button>
-                <button class="settings-btn" id="themeBtn" title="Theme" aria-label="Change Theme" tabindex="0">  🎨  </button>
+                <button class="settings-btn" id="langBtn" title="Language">  🌐  </button>
+                <button class="settings-btn" id="themeBtn" title="Theme">  🎨  </button>
+            </div>
+            <div class="top-left-settings">
+                <button class="settings-btn" id="greeting-btn" title="Play Greeting"> 🔊 </button>
             </div>
         </div>
         <div id="chat-log"></div>
         <div id="user-input-area"></div>
-        <!-- Proceed button with accessibility label -->
-        <button id="proceedButton" class="glowing-oval-button" aria-label="Proceed to next step" tabindex="0">
+        <!-- NEW: Proceed button for conversation practice -->
+        <button id="proceedButton" class="glowing-oval-button">
             <span class="arrow-icon">&#x2192;</span>
         </button>
     </div>
-<!-- ...existing code... -->
+</div>
+<div id="language-panel" class="settings-panel">
+    <div class="settings-content">
+        <h2>Language</h2>
+        <div class="settings-section">
+            <div class="settings-options" id="language-options">
+                <button class="option-btn" data-lang="en">  🇬🇧   English</button>
+                <button class="option-btn" data-lang="mm">  🇲🇲   Myanmar</button>
+                <button class="option-btn" data-lang="th">  🇹🇭   Thai</button>
+            </div>
+        </div>
+        <button class="action-button close-settings-btn" id="closeLangBtn">Close</button>
+    </div>
+</div>
+<div id="theme-panel" class="settings-panel">
+    <div class="settings-content">
+        <h2>Theme</h2>
+        <div class="settings-section">
+            <div class="settings-options" id="theme-options">
+                <button class="option-btn" data-theme="theme-default">  ✨   Celestial Aura</button>
+                <button class="option-btn" data-theme="theme-midnight-bloom">   🌙    Midnight Bloom</button>
+                <button class="option-btn" data-theme="theme-high-contrast">  👁️   High Contrast (Colourblind-Friendly)</button>
+                <button class="option-btn" data-theme="theme-low-sensory">  🧠   Low Sensory (Autism-Friendly)</button>
+                <button class="option-btn" data-theme="theme-pride">  🌈   Pride</button>
+            </div>
+        </div>
+        <button class="action-button close-settings-btn" id="closeThemeBtn">Close</button>
+    </div>
+</div>
+<script>
+    // --- UTILITY & SETUP ---
+    const chatLog = document.getElementById('chat-log');
+    const userInputArea = document.getElementById('user-input-area');
+    const starBackground = document.getElementById('star-background');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const sidebar = document.getElementById('sidebar');
+    const collapseBtn = document.getElementById('collapse-btn');
+    const greetingBtn = document.getElementById('greeting-btn');
+    // --- NEW/MODIFIED FOR LEAD CAPTURE: Initialize conversationState with lastTopic ---
+    let conversationState = {
+        lastTopic: 'Welcome' // Default topic
+    };
+    let currentLanguage = 'en';
+    let currentTheme = 'theme-default';
+    // School contact information
+    const schoolInfo = {
+        address: {
+            en: 'Shwedagon pagoda road, Yangon, Myanmar',
+            mm: ' ရန်ကုန်မြို့၊   ရွှေတိဂုံဘုရားလမ်း၊   မြန်မာနိုင်ငံ ',
+            th: ' ที่อยู่โรงเรียนของคุณ '
+        },
+        phone: '+95 9445 224 501', // Replace with actual phone number
+        email: 'info@okaythai.com', // Replace with actual email
+        businessHours: {
+            en: 'Mon-Fri: 9 AM - 5 PM',
+            mm: ' တနင်္လာ - သောကြာ :  နံနက်   ၉   နာရီ  -  ညနေ   ၅   နာရီ ',
+            th: ' จันทร์ - ศุกร์ : 9.00  น . - 17.00  น .'
+        },
+        contactPersonPrompt: {
+            en: 'Please provide your name and phone number, and a staff member will contact you shortly.',
+            mm: ' သင့်အမည်နှင့်   ဖုန်းနံပါတ်ကို   ပေးပါ။   ကျွန်ုပ်တို့ဝန်ထမ်းများ   မကြာမီ   ဆက်သွယ်ပါမည်။ ',
+            th: ' กรุณาแจ้งชื่อและเบอร์โทรศัพท์ของคุณ   แล้วเจ้าหน้าที่จะติดต่อกลับไปโดยเร็วที่สุดค่ะ '
+        },
+        contactSuccess: {
+            en: 'Thank you! We have received your details and a staff member will contact you shortly.',
+            mm: ' ကျေးဇူးတင်ပါသည်။   သင့်အချက်အလက်များကို   လက်ခံရရှိပြီး   မကြာမီ   ဆက်သွယ်ပါမည်။ ',
+            th: ' ขอบคุณค่ะ !  เราได้รับข้อมูลของคุณแล้ว   และเจ้าหน้าที่จะติดต่อกลับไปโดยเร็วที่สุดค่ะ '
+        },
+        culturalIntroBotGreeting: { // New greeting for cultural chatbot
+            en: "Hello! I am your Cultural Compass. I have deep knowledge about both Thai and Myanmar cultures. Ask me anything about traditions, festivals, food, etiquette, or even historical tidbits!",
+            mm: " မင်္ဂလာပါ !  ကျွန်တော်က   ယဉ်ကျေးမှုလမ်းညွှန်  AI  ပါ။   ထိုင်းနှင့်   မြန်မာယဉ်ကျေးမှု၊   ဓလေ့ထုံးတမ်း၊   ပွဲတော်များ၊   အစားအသောက်များ၊   ကျင့်ဝတ်များနှင့်   သမိုင်းကြောင်းများကို   အသေးစိတ်သိရှိပါတယ်။   ဘာမေးချင်ပါသလဲ ?",
+            th: " สวัสดีค่ะ !  ดิฉันคือเข็มทิศวัฒนธรรมค่ะ   ดิฉันมีความรู้ลึกซึ้งเกี่ยวกับวัฒนธรรมไทยและเมียนมาอย่างกว้างขวาง   ถามได้ทุกเรื่องเกี่ยวกับประเพณี   เทศกาล   อาหาร   มารยาท   หรือแม้แต่เกร็ดประวัติศาสตร์นะคะ !"
+        },
+        questionLabel: {
+            en: "Question",
+            mm: " မေးခွန်း ",
+            th: " คำถาม "
+        },
+        // --- NEW FOR LEAD CAPTURE ---
+        enrollmentInquiryPrompt: {
+            en: 'Please provide your details below, and our staff will contact you to discuss enrollment options.',
+            mm: ' ကျေးဇူးပြု၍   အောက်ပါအချက်အလက်များကို   ဖြည့်စွက်ပေးပါ။   ကျွန်ုပ်တို့ဝန်ထမ်းများ   သင်တန်းစာရင်းသွင်းခြင်း   ရွေးချယ်စရာများကို   ဆွေးနွေးရန်   ဆက်သွယ်ပါမည်။ ',
+            th: ' กรุณาระบุรายละเอียดของคุณด้านล่าง   แล้วเจ้าหน้าที่จะติดต่อกลับไปเพื่อหารือเกี่ยวกับตัวเลือกการลงทะเบียนค่ะ '
+        }
+        // --- END NEW FOR LEAD CAPTURE ---
+    };
+    function loadFromStorage(key, fallback = null) {
+        const stored = localStorage.getItem(key);
+        return stored ? JSON.parse(stored) : fallback;
+    }
+    function saveToStorage(key, data) {
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+    function createStars() {
+        const numStars = 100;
+        starBackground.innerHTML = '';
+        for (let i = 0; i < numStars; i++) {
+            let star = document.createElement('div');
+            star.className = 'star';
+            let size = Math.random() * 2 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            star.style.animationDelay = `${Math.random() * 2}s`;
+            starBackground.appendChild(star);
+        }
+    }
+    // --- TRANSLATION DATA ---
+    const translations = {
+        en: {
+            welcome: '  สวัสดีค่ะ   (Sawasdee ka!) Welcome! I am your AI Concierge for the OKay Thai Language Center. How can I help you today?',
+            findCourse: 'Find a Course for Me', askQuestion: 'FAQs', meetLecturers: 'Meet the Lecturers', goBack: 'Go Back',
+            coursePrompt: 'I can definitely help with that! To recommend the perfect course, could you tell me what type of class you\'re interested in?',
+            levelPrompt: (type) => `Great choice! For the ${type}, which level are you interested in?`,
+            courseResultHeader: 'Your Recommended Course', enrollPrompt: 'I can guide you through enrollment for this course, or we can explore other options. What would you like to do?',
+            enrollNow: 'Enroll Now!   ✨  ', exploreOther: 'Explore Other Courses', mainMenu: 'Main Menu',
+            enrollSoon: 'This full enrollment feature is coming soon. For now, our staff will contact you via Facebook Messenger to complete your registration. Thank you!',
+            startOver: 'Start Over', faqPrompt: 'I have answers to many common questions. Which of these topics can I help with?',
+            faqFollowUp: 'Can I help with another topic?', seeOtherQuestions: 'See Other Questions', lecturerIntro: 'Here are some of our highly qualified and experienced lecturers:',
+            lecturerFollowUp: 'They bring a deep understanding of both cultures and a passion for teaching. What would you like to do next?',
+            typeQuestion: 'Type your question here...', send: 'Send', thinking: 'OKay Thai Bot is thinking...',
+            apiError: "I'm sorry, I couldn't generate a response right now. Please try again.",
+            connectionError: "I seem to be having trouble connecting. Please check your connection and try again.",
+            anythingElse: 'Is there anything else I can help with?', askAnother: 'Ask Another Question   ✨  ',
+            findLevel: 'Help Me Find My Level   🧠  ',
+            levelTestIntro: 'Great! I will ask you 3 questions to help determine the best starting level for you. Let\'s begin!',
+            levelTestResult: 'Thank you! Based on your answers, here is my recommendation:',
+            levelRecommendation: (level) => `It looks like you have a good grasp of the basics! I recommend starting with our **Normal Class - ${level}** to build on your existing knowledge.`,
+            levelCompleteBeginner: 'It looks like you\'re just starting your journey, which is exciting! I recommend our **Normal Class - Basic** course.',
+            viewCourse: 'View This Course', conversationPractice: 'Conversation Practice   🗣️  ', culturalCompass: 'Chat With Me   💬  ',
+            practiceIntro: 'Let\'s practice! Choose a real-world scenario:', practiceScenarioFood: 'Ordering Food', practiceScenarioTaxi: 'Calling a Taxi',
+            practiceScenarioDirections: 'Asking for Directions', practiceSoon: 'Excellent choice! The full, interactive role-playing feature is a premium tool for enrolled students. Here\'s a preview of how it would start:',
+            culturalIntro: 'I can certainly help with that. What deep cultural question do you have about Thailand?', howToReply: 'How should I reply?',
+            replySuggestionFood: 'A good reply would be: "  เอาผัดไทยกุ้งสดค่ะ  " (Ao Phat Thai goong sot kha) - "I\'ll have the Pad Thai with fresh shrimp, please."',
+            replySuggestionTaxi: 'A good reply would be: "  ไปสยามพารากอนครับ  " (Pai Siam Paragon krap) - "To Siam Paragon, please."',
+            replySuggestionDirections: 'A good reply would be: "  ขอโทษนะคะ     ไปวัดอรุณทางไหนคะ  " (Khothot na kha, pai Wat Arun thang nai kha?) - "Excuse me, which way is it to Wat Arun?"',
+            nameLabel: 'Name', priceLabel: 'Price', durationLabel: 'Duration', methodLabel: 'Method', qualificationLabel: 'Qualification', workLabel: 'Work',
+            teachingLabel: 'Teaching', collapseSidebar: 'Collapse Sidebar', expandSidebar: 'Expand Sidebar',
+            helloGreeting: 'Hello', sawasdeeGreeting: 'Sawasdee Ka', mingalaparGreeting: 'Mingalapar',
+            talkToHuman: 'Talk to a Human   👤 ', provideContactPrompt: 'Please provide your name and phone number, and a staff member will contact you shortly.',
+            yourName: 'Your Name', yourPhoneNumber: 'Your Phone Number', submit: 'Submit', contactSubmitted: 'Thank you! We have received your details and a staff member will contact you shortly.',
+            enrollNowFull: 'Enroll Now (Full Version)', fillOutForm: 'Fill out Enrollment Form',
+            schoolAddressLabel: 'Address', schoolPhoneLabel: 'Phone', schoolEmailLabel: 'Email', schoolHoursLabel: 'Business Hours',
+            contactUsTitle: 'Contact Us', culturalIntroBotGreeting: schoolInfo.culturalIntroBotGreeting.en, // Link to schoolInfo
+            questionLabel: schoolInfo.questionLabel.en,
+            // --- NEW FOR LEAD CAPTURE ---
+            enrollmentInquiry: 'Enrollment Inquiry ✨', // New button text
+            yourEmail: 'Your Email' // New label for email input
+            // --- END NEW FOR LEAD CAPTURE ---
+        },
+        mm: {
+            welcome: '  မင်္ဂလာပါ။   OKay Thai Language Center   မှ     ကြိုဆိုပါတယ်။     ကျွန်တော်က   AI Concierge   ပါ။   ဒီနေ့     ဘာအကူအညီပေးရမလဲခင်ဗျာ။  ',
+            findCourse: '  သင်တန်းရှာရန်  ', askQuestion: '  အမေးများသောမေးခွန်းများ  ', meetLecturers: '  ဆရာ  /  ဆရာမများနှင့်     တွေ့ဆုံရန်  ', goBack: '  နောက်သို့ပြန်သွားရန်  ',
+            coursePrompt: '  ကျွန်တော်ကူညီနိုင်ပါတယ်။   သင့်အတွက်အကောင်းဆုံးသင်တန်းကိုအကြံပြုနိုင်ရန်     ဘယ်လိုသင်တန်းအမျိုးအစားကို     စိတ်ဝင်စားပါသလဲ။  ',
+            levelPrompt: (type) => `${type}   အတွက်     ဘယ်အဆင့်ကို     စိတ်ဝင်စားပါသလဲ။  `, courseResultHeader: '  သင်၏     အကြံပြုသင်တန်း  ',
+            enrollPrompt: '  ဤသင်တန်းအတွက်     စာရင်းသွင်းရန်     လမ်းညွှန်ပေးနိုင်သည်     သို့မဟုတ်     အခြားရွေးချယ်စရာများကို     ရှာဖွေနိုင်ပါသည်။   ဘာလုပ်ချင်ပါသလဲ။  ',
+            enrollNow: '  ယခုစာရင်းသွင်းပါ။     ✨  ', exploreOther: '  အခြားသင်တန်းများရှာဖွေရန်  ', mainMenu: '  ပင်မမီနူး  ',
+            enrollSoon: '  ဤစာရင်းသွင်းခြင်းအင်္ဂါရပ်သည်     မကြာမီလာမည်။   လောလောဆယ်တွင်     ကျွန်ုပ်တို့၏ဝန်ထမ်းများက     သင့်စာရင်းသွင်းခြင်းကို     အပြီးသတ်ရန်   Facebook Messenger   မှတစ်ဆင့်     ဆက်သွယ်ပါမည်။     ကျေးဇူးတင်ပါသည်။  ',
+            startOver: '  အစကနေပြန်စရန်  ', faqPrompt: '  အမေးများသောမေးခွန်းများအတွက်     အဖြေများရှိပါသည်။     ဘယ်အကြောင်းအရာကို     ကူညီရမလဲ။  ',
+            faqFollowUp: '  အခြားအကြောင်းအရာတစ်ခုခုကို     ကူညီနိုင်ပါသေးသလား။  ', seeOtherQuestions: '  အခြားမေးခွန်းများကြည့်ရန်  ', lecturerIntro: '  ဤသည်မှာ     ကျွန်ုပ်တို့၏     အရည်အချင်းပြည့်မီပြီး     အတွေ့အကြုံရှိသော     ဆရာ  /  ဆရာမအချို့ဖြစ်ပါသည်။  ',
+            lecturerFollowUp: '  သူတို့သည်     ယဉ်ကျေးမှုနှစ်ခုလုံးကို     နက်နက်နဲနဲနားလည်ပြီး     သင်ကြားရေးကို     စိတ်အားထက်သန်ကြသည်။     နောက်ဘာလုပ်ချင်ပါသလဲ။  ',
+            typeQuestion: '  သင့်မေးခွန်းကို     ဤနေရာတွင်     ရိုက်ထည့်ပါ  ...', send: '  ပို့ရန်  ', thinking: 'OKay Thai Bot   စဉ်းစားနေသည်  ...',
+            apiError: "  တောင်းပန်ပါတယ်။     အခုလောလောဆယ်     အဖြေမပေးနိုင်သေးပါဘူး။     ကျေးဇူးပြု၍     နောက်တစ်ကြိမ်ထပ်ကြိုးစားပါ။  ",
+            connectionError: "  ချိတ်ဆက်ရာတွင်     အခက်အခဲရှိနေပုံရသည်။     ကျေးဇူးပြု၍     သင်၏ချိတ်ဆက်မှုကိုစစ်ဆေးပြီး     နောက်တစ်ကြိမ်ထပ်ကြိုးစားပါ။  ",
+            anythingElse: '  နောက်ထပ်ဘာများကူညီပေးရမလဲခင်ဗျာ။  ', askAnother: '  နောက်ထပ်မေးခွန်းတစ်ခုမေးရန်     ✨  ',
+            findLevel: '  ကျွန်ုပ်၏အဆင့်ကိုရှာဖွေရန်ကူညီပါ     🧠  ',
+            levelTestIntro: '  ကောင်းပါပြီ  !  သင့်အတွက်     အကောင်းဆုံးအစပြုအဆင့်ကို     ဆုံးဖြတ်ရန်     မေးခွန်း     ၃     ခု     မေးပါမည်။     စလိုက်ကြရအောင်။  ',
+            levelTestResult: '  ကျေးဇူးတင်ပါတယ်  !   သင်၏အဖြေများပေါ်မူတည်၍     ဤသည်မှာ     ကျွန်ုပ်၏အကြံပြုချက်ဖြစ်ပါသည်။  ',
+            levelRecommendation: (level) => `  သင်ဟာ     အခြေခံတွေကို     ကောင်းကောင်းနားလည်ထားပုံရပါတယ်  !  သင့်ရဲ့ရှိပြီးသားအသိပညာကို     တည်ဆောက်ဖို့     ကျွန်ုပ်တို့ရဲ့   **Normal Class - ${level}** နဲ့     စတင်ဖို့     အကြံပြုလိုပါတယ်။  `,
+            levelCompleteBeginner: '  သင်ဟာ     ခရီးတစ်ခုကို     အခုမှစတင်နေတာဖြစ်ပြီး     ဒါက     စိတ်လှုပ်ရှားစရာကောင်းပါတယ်  !  ကျွန်ုပ်တို့ရဲ့   **Normal Class - Basic** သင်တန်းကို     အကြံပြုလိုပါတယ်။  ',
+            viewCourse: '  ဤသင်တန်းကိုကြည့်ရန်  ', conversationPractice: '  စကားပြောလေ့ကျင့်ခန်း     🗣️  ', culturalCompass: '  သိလိုရာမေး     💬  ',
+            practiceIntro: '  လေ့ကျင့်ကြရအောင်။   လက်တွေ့ဘဝအခြေအနေတစ်ခုကို     ရွေးချယ်ပါ။  ', practiceScenarioFood: '  အစားအစာ     မှာယူခြင်း  ', practiceScenarioTaxi: '  တက္ကစီ     ငှားရမ်းခြင်း  ',
+            practiceScenarioDirections: '  လမ်းညွှန်     မေးမြန်းခြင်း  ', practiceSoon: '  ဒါက     ရွေးချယ်မှုကောင်းတစ်ခုပါ။   စာရင်းသွင်းပြီးနောက်     ပ   ရီ   မီယံကျောင်းသားအတွေ့အကြုံ၏     တစ်စိတ်တစ်ပိုင်းအဖြစ်     အပြန်အလှန်အကျိုးသက်ရောက်မှုရှိသော     အခန်းကဏ္ဍသရုပ်ဆောင်ခြင်းအင်္ဂါရပ်အပြည့်အစုံကို     ရရှိနိုင်မှာဖြစ်ပါတယ်။   ၎င်းသည်     ဤသို့စတင်မည်ဖြစ်သည်  ...',
+            culturalIntro: '  ကူညီနိုင်ပါတယ်။     ထိုင်းယဉ်ကျေးမှုနဲ့ပတ်သက်ပြီး     ဘယ်လိုနက်နဲတဲ့မေးခွန်းမျိုး     သိချင်ပါသလဲ။  ', howToReply: '  ဘယ်လိုပြန်ဖြေရမလဲ။  ',
+            replySuggestionFood: '  ကောင်းသောပြန်စာတစ်ခုမှာ   "  เอาผัดไทยกุ้งสดค่ะ  " (Ao Phat Thai goong sot kha) - "  ผัดไทย     ပုစွန်လတ်နဲ့ပါ     ကျေးဇူးပြု၍  "   ဖြစ်သည်။  ',
+            replySuggestionTaxi: '  ကောင်းသောပြန်စာတစ်ခုမှာ   "  ไปสยามพารากอนครับ  " (Pai Siam Paragon krap) - "Siam Paragon   ကို     သွားပါ     ကျေးဇူးပြု၍  "   ဖြစ်သည်။  ',
+            replySuggestionDirections: '  ကောင်းသောပြန်စာတစ်ခုမှာ   "  ขอโทษนะคะ     ไปวัดอรุณทางไหนคะ  " (Khothot na kha, pai Wat Arun thang nai kha?) - "  တစ်ဆိတ်လောက်ပါ   Wat Arun   ကို     ဘယ်လမ်းက     သွားရမလဲ  "   ဖြစ်သည်။  ',
+            nameLabel: '  အမည်  ', priceLabel: '  စျေးနှုန်း  ', durationLabel: '  ကြာချိန်  ', methodLabel: '  သင်ကြားနည်း  ', qualificationLabel: '  အရည်အချင်း  ', workLabel: '  အလုပ်  ', teachingLabel: '  သင်ကြားမှု  ',
+            collapseSidebar: ' ဘေးဘောင်ပိတ်ရန် ', expandSidebar: ' ဘေးဘောင်ဖွင့်ရန် ',
+            helloGreeting: 'Hello ( မင်္ဂလာပါ )', sawasdeeGreeting: 'Sawadeeka ( สวัสดีค่ะ )', mingalaparGreeting: 'Mingalapar ( မင်္ဂလာပါ )',
+            talkToHuman: ' လူနှင့်စကားပြောရန်    👤 ', provideContactPrompt: schoolInfo.contactPersonPrompt.mm,
+            yourName: ' သင့်အမည် ', yourPhoneNumber: ' သင့်ဖုန်းနံပါတ် ', submit: ' ပေးပို့ရန် ', contactSubmitted: schoolInfo.contactSuccess.mm,
+            enrollNowFull: ' ယခုစာရင်းသွင်းရန်  ( အပြည့်အစုံ )', fillOutForm: ' စာရင်းသွင်းဖောင်ဖြည့်ရန် ',
+            schoolAddressLabel: ' လိပ်စာ ', schoolPhoneLabel: ' ဖုန်း ', schoolEmailLabel: ' အီးမေးလ် ', schoolHoursLabel: ' ဖွင့်ချိန် ',
+            contactUsTitle: ' ဆက်သွယ်ရန် ', culturalIntroBotGreeting: schoolInfo.culturalIntroBotGreeting.mm, // Link to schoolInfo
+            questionLabel: schoolInfo.questionLabel.mm,
+            // --- NEW FOR LEAD CAPTURE ---
+            enrollmentInquiry: ' စာရင်းသွင်းစုံစမ်းရန်    ✨ ', // New button text
+            yourEmail: ' သင့်အီးမေးလ် ' // New label for email input
+            // --- END NEW FOR LEAD CAPTURE ---
+        },
+        th: {
+            welcome: '  สวัสดีค่ะ  !  ยินดีต้อนรับสู่   OKay Thai Language Center   ดิฉันคือ   AI Concierge   ค่ะ     วันนี้มีอะไรให้ช่วยคะ  ',
+            findCourse: '  ค้นหาคอร์สของคุณ  ', askQuestion: '  คำถามที่พบบ่อย ', meetLecturers: '  พบกับอาจารย์  ', goBack: '  กลับไป  ',
+            coursePrompt: '  ช่วยได้แน่นอนค่ะ  !  เพื่อแนะนำคอร์สที่สมบูรณ์แบบที่สุด     ไม่ทราบว่าสนใจคลาสประเภทไหนคะ  ',
+            levelPrompt: (type) => `  ยอดเยี่ยมค่ะ  !  สำหรับ   ${type}   สนใจระดับไหนคะ  `, courseResultHeader: '  คอร์สแนะนำของคุณ  ',
+            enrollPrompt: '  สามารถแนะนำขั้นตอนการลงทะเบียนสำหรับคอร์สนี้     หรือจะดูตัวเลือกอื่นๆ     ก่อนก็ได้ค่ะ     ต้องการทำอะไรต่อคะ  ',
+            enrollNow: '  ลงทะเบียนเลย  !  ✨  ', exploreOther: '  ดูคอร์สอื่นๆ  ', mainMenu: '  เมนูหลัก  ',
+            enrollSoon: '  ฟีเจอร์การลงทะเบียนเต็มรูปแบบกำลังจะมาในเร็วๆ     นี้ค่ะ     สำหรับตอนนี้     เจ้าหน้าที่จะติดต่อคุณผ่าน   Facebook Messenger   เพื่อดำเนินการลงทะเบียนให้เสร็จสิ้น     ขอบคุณที่ให้ความสนใจค่ะ  !',
+            startOver: '  เริ่มต้นใหม่  ', faqPrompt: '  มีคำตอบสำหรับคำถามที่พบบ่อยหลายข้อค่ะ     ไม่ทราบว่าสนใจหัวข้อไหนคะ  ',
+            faqFollowUp: '  มีหัวข้ออื่นให้ช่วยอีกไหมคะ  ', seeOtherQuestions: '  ดูคำถามอื่นๆ  ', lecturerIntro: '  นี่คือส่วนหนึ่งของอาจารย์ผู้ทรงคุณวุฒิและมีประสบการณ์ของเราค่ะ  :',
+            lecturerFollowUp: '  พวกเขามีความเข้าใจอย่างลึกซึ้งในทั้งสองวัฒนธรรมและความมุ่งมั่นในการสอนค่ะ     ต้องการทำอะไรต่อคะ  ',
+            typeQuestion: '  พิมพ์คำถามของคุณที่นี่  ...', send: '  ส่ง  ', thinking: 'OKay Thai Bot   กำลังคิด  ...',
+            apiError: "  ขออภัยค่ะ     ไม่สามารถสร้างคำตอบได้ในขณะนี้     กรุณาลองใหม่อีกครั้งค่ะ  ",
+            connectionError: "  ดูเหมือนว่าจะมีปัญหาในการเชื่อมต่อ     กรุณาตรวจสอบการเชื่อมต่อของคุณแล้วลองใหม่อีกครั้งค่ะ  ",
+            anythingElse: '  มีอะไรให้ช่วยอีกไหมคะ  ', askAnother: '  ถามคำถามอื่น   ✨  ',
+            findLevel: '  ช่วยฉันหาระดับของฉัน     🧠  ',
+            levelTestIntro: '  เยี่ยมมากค่ะ  !  ดิฉันจะถามคำถาม   3   ข้อเพื่อช่วยหาระดับเริ่มต้นที่ดีที่สุดสำหรับคุณ     มาเริ่มกันเลยค่ะ  !',
+            levelTestResult: '  ขอบคุณค่ะ  !  จากคำตอบของคุณ     นี่คือคำแนะนำของดิฉันค่ะ  :',
+            levelRecommendation: (level) => `  ดูเหมือนว่าคุณมีความเข้าใจพื้นฐานเป็นอย่างดี  !  ขอแนะนำให้เริ่มต้นด้วย   **Normal Class - ${level}** ของเราเพื่อต่อยอดจากความรู้ที่มีอยู่ค่ะ  `,
+            levelCompleteBeginner: '  ดูเหมือนว่าคุณเพิ่งเริ่มต้นการเดินทางซึ่งน่าตื่นเต้นมากค่ะ  !  ขอแนะนำคอร์ส   **Normal Class - Basic** ของเราค่ะ  ',
+            viewCourse: '  ดูคอร์สนี้  ', conversationPractice: '  ฝึกสนทนา     🗣️  ', culturalCompass: '  เข็มทิศวัฒนธรรม     💬  ',
+            practiceIntro: '  มาฝึกกันเถอะ  !  เลือกสถานการณ์จริง  :', practiceScenarioFood: '  สั่งอาหาร  ', practiceScenarioTaxi: '  เรียกแท็กซี่  ',
+            practiceScenarioDirections: '  ถามทาง  ', practiceSoon: '  เป็นตัวเลือกที่ยอดเยี่ยมค่ะ  !  ฟีเจอร์การแสดงบทบาทสมมติแบบโต้ตอบเต็มรูปแบบเป็นส่วนหนึ่งของประสบการณ์นักเรียนพรีเมียมหลังจากการลงทะเบียนค่ะ     มันจะเริ่มต้นแบบนี้  ...',
+            culturalIntro: '  ช่วยได้ค่ะ     มีคำถามเชิงลึกเกี่ยวกับวัฒนธรรมไทยอะไรที่อยากรู้คะ  ', howToReply: '  ฉันควรตอบอย่างไร  ?',
+            replySuggestionFood: '  คำตอบที่ดีคือ   "  เอาผัดไทยกุ้งสดค่ะ  " (Ao Phat Thai goong sot kha) - "  ขอผัดไทยกุ้งสดค่ะ  "',
+            replySuggestionTaxi: '  คำตอบที่ดีคือ   "  ไปสยามพารากอนครับ  " (Pai Siam Paragon krap) - "  ไปสยามพารากอนครับ  "',
+            replySuggestionDirections: '  คำตอบที่ดีคือ   "  ขอโทษนะคะ     ไปวัดอรุณทางไหนคะ  " (Khothot na kha, pai Wat Arun thang nai kha?) - "  ขอโทษนะคะ     ไปวัดอรุณทางไหนคะ  "',
+            nameLabel: '  ชื่อ  ', priceLabel: '  ราคา  ', durationLabel: '  ระยะเวลา  ', methodLabel: '  วิธีการสอน  ', qualificationLabel: '  คุณวุฒิ  ', workLabel: '  การทำงาน  ', teachingLabel: '  การสอน  ',
+            collapseSidebar: ' ยุบแถบด้านข้าง ', expandSidebar: ' ขยายแถบด้านข้าง ',
+            helloGreeting: 'Hello', sawasdeeGreeting: 'Sawasdee Ka ( สวัสดีค่ะ )', mingalaparGreeting: 'Mingalapar',
+            talkToHuman: ' คุยกับเจ้าหน้าที่    👤 ', provideContactPrompt: schoolInfo.contactPersonPrompt.th,
+            yourName: ' ชื่อของคุณ ', yourPhoneNumber: ' เบอร์โทรศัพท์ของคุณ ', submit: ' ส่ง ', contactSubmitted: schoolInfo.contactSuccess.th,
+            enrollNowFull: ' ลงทะเบียนตอนนี้  ( ฉบับเต็ม )', fillOutForm: ' กรอกแบบฟอร์มลงทะเบียน ',
+            schoolAddressLabel: ' ที่อยู่ ', schoolPhoneLabel: ' โทรศัพท์ ', schoolEmailLabel: ' อีเมล ', schoolHoursLabel: ' เวลาทำการ ',
+            contactUsTitle: ' ติดต่อเรา ', culturalIntroBotGreeting: schoolInfo.culturalIntroBotGreeting.th, // Link to schoolInfo
+            questionLabel: schoolInfo.questionLabel.th,
+            // --- NEW FOR LEAD CAPTURE ---
+            enrollmentInquiry: ' สอบถามการลงทะเบียน    ✨ ', // New button text
+            yourEmail: ' อีเมลของคุณ ' // New label for email input
+            // --- END NEW FOR LEAD CAPTURE ---
+        }
+    };
+    function t(key, ...args) {
+        const template = translations[currentLanguage][key] || translations['en'][key];
+        return typeof template === 'function' ? template(...args) : template;
+    }
+    // --- SETTINGS AND THEME LOGIC ---
+    function setLanguage(lang) {
+        currentLanguage = lang;
+        saveToStorage('okayThaiLang', lang);
+        updateSettingsUI();
+        populateSidebarNav(); // Re-populate sidebar with new language
+        chatLog.innerHTML = '';
+        startConversation();
+    }
+    function setTheme(theme) {
+        currentTheme = theme;
+        document.body.className = theme;
+        saveToStorage('okayThaiTheme', theme);
+        updateSettingsUI();
+    }
+    function updateSettingsUI() {
+        document.querySelectorAll('#language-options .option-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === currentLanguage);
+        });
+        document.querySelectorAll('#theme-options .option-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === currentTheme);
+        });
+        // Update collapse button text based on current language
+        if (sidebar.classList.contains('collapsed')) {
+            collapseBtn.textContent = ' ☰ '; // Icon for collapsed
+            collapseBtn.title = t('expandSidebar');
+        } else {
+            collapseBtn.textContent = ' ✖ '; // Icon for expanded
+            collapseBtn.title = t('collapseSidebar');
+        }
+        // Update greeting button title
+        greetingBtn.title = t(`${currentLanguage === 'th' ? 'sawasdeeGreeting' : currentLanguage === 'mm' ? 'mingalaparGreeting' : 'helloGreeting'}`);
+    }
+    function openPanel(panelId) { document.getElementById(panelId).style.display = 'flex'; }
+    function closePanel(panelId) { document.getElementById(panelId).style.display = 'none'; }
+    // --- CORE CHAT LOGIC ---
+    function appendMessage(sender, content, isLoading = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${sender}`;
+        const avatar = sender === 'ai' ? '  👩🏻 ‍ 🏫  ' : '  🧑🏻 ‍ 💻  ';
+        if (isLoading) messageDiv.id = 'loading-message';
+        messageDiv.innerHTML = `<div class="avatar">${avatar}</div><div class="message-content">${content}</div>`;
+        chatLog.appendChild(messageDiv);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+    function removeLoadingMessage() {
+        const loadingMsg = document.getElementById('loading-message');
+        if (loadingMsg) loadingMsg.remove();
+    }
+    function clearInputArea() { userInputArea.innerHTML = ''; }
+    function addButton(translationKey, action, targetArea = userInputArea, iconHtml = '') {
+        const button = document.createElement('button');
+        button.className = 'action-button';
+        const buttonText = t(translationKey);
+        if (targetArea === sidebarNav) {
+            button.innerHTML = `<span class="button-icon">${iconHtml}</span><span class="button-text">${buttonText}</span>`;
+        } else {
+            button.textContent = buttonText;
+        }
+        button.onclick = () => {
+            if(targetArea === userInputArea) { // Only append user message if button is in main input area
+                appendMessage('user', buttonText);
+            }
+            action();
+        };
+        targetArea.appendChild(button);
+    }
+    // --- GEMINI API INTEGRATION ---
+    async function callGeminiAPI(prompt) {
+        appendMessage('ai', t('thinking'), true);
+        clearInputArea();
+        const apiKey = "AIzaSyDrplq_5met7I49eJh2khcGO9-FghFgQLg"; // Your API key would go here for external deployment
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+        try {
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error(`API call failed: ${response.status}`);
+            const result = await response.json();
+            removeLoadingMessage();
+            return result.candidates?.[0]?.content?.parts?.[0]?.text || t('apiError');
+        } catch (error) {
+            console.error("Gemini API Error:", error);
+            removeLoadingMessage();
+            return t('connectionError');
+        }
+    }
+    // --- CONVERSATION FLOW ---
+    // --- NEW/MODIFIED FOR LEAD CAPTURE: Update conversationState.lastTopic in main flow functions ---
+    function startConversation() {
+        conversationState.lastTopic = 'Welcome'; // Set topic on main menu
+        chatLog.innerHTML = ''; // Clear chat log on main menu
+        clearInputArea();
+        appendMessage('ai', t('welcome'));
+    }
+    function showCourseOptions() {
+        conversationState.lastTopic = 'Course Inquiry'; // Set topic
+        clearInputArea();
+        appendMessage('ai', t('coursePrompt'));
+        Object.keys(data.courses).forEach(classType => {
+            const button = document.createElement('button');
+            button.className = 'action-button';
+            button.textContent = classType;
+            button.onclick = () => { appendMessage('user', classType); selectClassType(classType); };
+            userInputArea.appendChild(button);
+        });
+        addButton('goBack', startConversation);
+    }
+    function selectClassType(classType) {
+        conversationState.classType = classType;
+        const levels = data.courses[classType];
+        clearInputArea();
+        if (levels.length === 1) {
+            showCourseResult(levels[0]);
+        } else {
+            appendMessage('ai', t('levelPrompt', classType));
+            levels.forEach(course => {
+                const button = document.createElement('button');
+                button.className = 'action-button';
+                button.textContent = course.level[currentLanguage];
+                button.onclick = () => { appendMessage('user', course.level[currentLanguage]); showCourseResult(course); };
+                userInputArea.appendChild(button);
+            });
+            addButton('goBack', showCourseOptions);
+        }
+    }
+    function showCourseResult(course) {
+        conversationState.selectedCourse = course;
+        clearInputArea();
+        const courseCard = `<div class="card"><h3>${t('courseResultHeader')}</h3><p><strong>${t('nameLabel')}:</strong> ${course.name[currentLanguage]}</p><p><strong>${t('priceLabel')}:</strong> ${course.price}</p><p><strong>${t('durationLabel')}:</strong> ${course.duration}</p><p><strong>${t('methodLabel')}:</strong> ${course.teaching[currentLanguage]}</p></div>`;
+        appendMessage('ai', courseCard);
+        appendMessage('ai', t('enrollPrompt'));
+        // --- MODIFIED: Enroll button now leads to new lead form ---
+        addButton('enrollNowFull', () => handleEnrollmentFlow(course));
+        // --- END MODIFIED ---
+        addButton('exploreOther', showCourseOptions);
+        addButton('mainMenu', startConversation);
+    }
+    // Updated Enrollment Flow
+    function handleEnrollmentFlow(course) {
+        clearInputArea();
+        appendMessage('ai', `To proceed with enrollment for **${course.name[currentLanguage]}**, you can provide your contact details for a staff member to assist you.`);
+        // --- MODIFIED: fillOutForm now calls showEnrollmentLeadForm ---
+        addButton('fillOutForm', () => showEnrollmentLeadForm(course));
+        // --- END MODIFIED ---
+        addButton('talkToHuman', requestHumanContact);
+        addButton('goBack', () => showCourseResult(course));
+        addButton('mainMenu', startConversation);
+    }
+    // --- MODIFIED: submitContactDetails renamed to submitLeadDetails and updated for lead capture ---
+    // The old requestHumanContact function is still there for simple contact form
+    function requestHumanContact() {
+        conversationState.lastTopic = 'Human Contact Request'; // Set topic
+        clearInputArea();
+        appendMessage('ai', t('provideContactPrompt'));
+        const contactFormHtml = `
+            <div>
+                <input type="text" id="contact-name" class="contact-form-input" placeholder="${t('yourName')}">
+                <input type="tel" id="contact-phone" class="contact-form-input" placeholder="${t('yourPhoneNumber')}">
+                <button id="submit-contact" class="contact-form-submit-btn">${t('submit')}</button>
+            </div>
+        `;
+        userInputArea.innerHTML = contactFormHtml;
+        document.getElementById('submit-contact').onclick = submitContactDetails; // Calls the original contact submit
+    }
+
+    // --- NEW LEAD CAPTURE FUNCTIONS ---
+    // Function to display the lead capture form
+    function showEnrollmentLeadForm(course = null) {
+        conversationState.lastTopic = 'Enrollment Inquiry Form'; // Set topic
+        clearInputArea();
+        let introMessage = schoolInfo.enrollmentInquiryPrompt[currentLanguage];
+        if (course) {
+            introMessage = `To help you enroll in **${course.name[currentLanguage]}**, please provide your details:`;
+        }
+        appendMessage('ai', introMessage);
+
+        const leadFormHtml = `
+            <div>
+                <input type="text" id="lead-name" class="contact-form-input" placeholder="${t('yourName')}" required>
+                <input type="email" id="lead-email" class="contact-form-input" placeholder="${t('yourEmail')} (e.g., example@email.com)">
+                <input type="tel" id="lead-phone" class="contact-form-input" placeholder="${t('yourPhoneNumber')}">
+                <select id="lead-course-interest" class="contact-form-input">
+                    <option value="">-- ${t('findCourse')} --</option>
+                    <option value="Normal Class - Basic">${t('Normal Class - Basic', 'en')}</option>
+                    <option value="Normal Class - Level 2">${t('Normal Class - Level 2', 'en')}</option>
+                    <option value="Normal Class - Level 3">${t('Normal Class - Level 3', 'en')}</option>
+                    <option value="Children Class - Basic">${t('Children Class - Basic', 'en')}</option>
+                    <option value="Children Class - Level 2">${t('Children Class - Level 2', 'en')}</option>
+                    <option value="Basic Speaking Class">${t('Basic Speaking Class', 'en')}</option>
+                    <option value="Private Class">${t('Private Class', 'en')}</option>
+                </select>
+                <button id="submit-lead" class="contact-form-submit-btn">${t('submit')}</button>
+            </div>
+        `;
+        userInputArea.innerHTML = leadFormHtml;
+        document.getElementById('submit-lead').onclick = submitLeadDetails;
+
+        if (course && document.getElementById('lead-course-interest')) {
+            const courseSelect = document.getElementById('lead-course-interest');
+            for (let i = 0; i < courseSelect.options.length; i++) {
+                if (courseSelect.options[i].value === course.name.en) {
+                    courseSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Function to submit lead details to a backend
+    async function submitLeadDetails() {
+        const name = document.getElementById('lead-name').value.trim();
+        const email = document.getElementById('lead-email').value.trim();
+        const phone = document.getElementById('lead-phone').value.trim();
+        const interestedCourse = document.getElementById('lead-course-interest').value;
+        const conversationTag = conversationState.lastTopic || 'General Inquiry'; // Capture last known topic
+
+        if (!name || (!email && !phone)) {
+            alert('Please provide your Name and at least an Email or Phone Number.');
+            return;
+        }
+
+        appendMessage('user', `Name: ${name}, Email: ${email || 'N/A'}, Phone: ${phone || 'N/A'}, Course: ${interestedCourse || 'N/A'}`);
+
+        const leadData = {
+            name: name,
+            email: email,
+            phone: phone,
+            interestedCourse: interestedCourse,
+            source: 'OKay Thai Bot',
+            status: 'New Lead',
+            followUpNeeded: true, // Default to true for new leads
+            conversationTag: conversationTag, // Tag based on last topic
+            timestamp: new Date().toISOString()
+        };
+
+        // --- IMPORTANT: REPLACE WITH YOUR ACTUAL BACKEND API ENDPOINT ---
+        // This is a placeholder. Your backend server needs to be running and accessible at this URL.
+        const backendEndpoint = 'http://localhost:3000/leads'; // Example: if your backend runs locally on port 3000
+
+        try {
+            const response = await fetch(backendEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // If your backend requires an API key or token, add it here:
+                    // 'Authorization': 'Bearer YOUR_BACKEND_API_KEY'
+                },
+                body: JSON.stringify(leadData)
+            });
+
+            if (response.ok) {
+                appendMessage('ai', t('contactSubmitted')); // Reuse existing translation for success
+                console.log('Lead submitted successfully:', leadData);
+            } else {
+                const errorText = await response.text();
+                appendMessage('ai', "Sorry, there was an issue submitting your details. Please try again later.");
+                console.error('Failed to submit lead to backend:', response.status, response.statusText, errorText);
+            }
+        } catch (error) {
+            appendMessage('ai', "Network error. Please check your connection and try again.");
+            console.error('Network error submitting lead:', error);
+        }
+
+        clearInputArea();
+        addButton('mainMenu', startConversation);
+    }
+    // --- END NEW LEAD CAPTURE FUNCTIONS ---
+
+    // Original submitContactDetails (kept for the 'Talk to a Human' path if desired)
+    function submitContactDetails() {
+        const name = document.getElementById('contact-name').value.trim();
+        const phone = document.getElementById('contact-phone').value.trim();
+        if (name && phone) {
+            console.log(`Contact Details Submitted (Original Form): Name - ${name}, Phone - ${phone}`);
+            appendMessage('user', `Name: ${name}, Phone: ${phone}`);
+            appendMessage('ai', t('contactSubmitted'));
+            clearInputArea();
+            addButton('startOver', startConversation);
+        } else {
+            alert('Please fill in both your name and phone number.');
+        }
+    }
+
+    function showFaqOptions() {
+        conversationState.lastTopic = 'FAQ Inquiry'; // Set topic
+        clearInputArea();
+        appendMessage('ai', t('faqPrompt'));
+        const faqTopics = [...new Set(data.faqs.map(f => f.category))];
+        faqTopics.forEach(topic => {
+            const button = document.createElement('button');
+            button.className = 'action-button';
+            button.textContent = topic;
+            button.onclick = () => { appendMessage('user', topic); showFaqAnswer(topic); };
+            userInputArea.appendChild(button);
+        });
+        addButton('goBack', startConversation);
+    }
+    function showFaqAnswer(topic) {
+        clearInputArea();
+        const relevantFaqs = data.faqs.filter(f => f.category === topic);
+        let faqHtml = `Here are questions related to ${topic}:<br/><br/>`;
+        relevantFaqs.forEach(faq => { faqHtml += `<strong>Q: ${faq.question[currentLanguage]}</strong><br/>A: ${faq.answer[currentLanguage]}<br/><br/>`; });
+        appendMessage('ai', faqHtml);
+        appendMessage('ai', t('faqFollowUp'));
+        addButton('seeOtherQuestions', showFqaOptions); // Corrected typo from showFqaOptions to showFaqOptions
+        addButton('mainMenu', startConversation);
+    }
+    function showLecturers() {
+        conversationState.lastTopic = 'Lecturer Info'; // Set topic
+        clearInputArea();
+        let lecturerCards = `${t('lecturerIntro')}<br/><br/><div id="lecturer-list" style="max-height: 300px; overflow-y: auto; padding-right: 10px;">`;
+        data.lecturers.forEach(lecturer => {
+            lecturerCards += `
+                <div class="card">
+                    <img src="${lecturer.photoUrl}" alt="Photo of ${lecturer.name}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: contain; margin: 0 auto 10px; display: block;">
+                    <h3>${lecturer.name}</h3>
+                    <p><strong>${t('qualificationLabel')}:</strong> ${lecturer.qualification[currentLanguage]}</p>
+                    <p><strong>${t('workLabel')}:</strong> ${lecturer.workExperience[currentLanguage]}</p>
+                    <p><strong>${t('teachingLabel')}:</strong> ${lecturer.teachingExperience[currentLanguage]}</p>
+                </div>`;
+        });
+        lecturerCards += `</div>`;
+        appendMessage('ai', lecturerCards);
+        appendMessage('ai', t('lecturerFollowUp'));
+        addButton('findCourse', showCourseOptions);
+        addButton('mainMenu', startConversation);
+    }
+    // --- PLACEMENT TEST FLOW ---
+    let testScore = 0;
+    let questionNumber = 0;
+    const totalQuestions = 3;
+    function startLevelTest() {
+        conversationState.lastTopic = 'Level Test'; // Set topic
+        testScore = 0;
+        questionNumber = 1;
+        chatLog.innerHTML = ''; // Clear chat log to start fresh for test
+        clearInputArea();
+        appendMessage('ai', t('levelTestIntro'));
+        askTestQuestion();
+    }
+    async function askTestQuestion() {
+        const difficultyLevels = ['Beginner (A1)', 'Lower Intermediate (A2)', 'Intermediate (B1)'];
+        const difficulty = difficultyLevels[questionNumber - 1];
+        // Prompt now explicitly asks for translation into currentLanguage
+        const prompt = `You are an AI Thai language tutor.
+        Generate one unique, multiple-choice question to test a student's ${difficulty} level knowledge of Thai.
+        The question should be about either vocabulary or simple grammar. Provide the question in English.
+        Provide four possible answers in Thai script with English transliterations, and translate the answers into ${currentLanguage} for clarity.
+        Return ONLY a valid JSON object with the keys "question", "options" (an array of 4 strings where each string includes Thai script, transliteration, and ${currentLanguage} translation), and "correctAnswer" (the index of the correct option, 0-3).`;
+        const rawResponse = await callGeminiAPI(prompt);
+        try {
+            const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error("No JSON object found in the response.");
+            const questionData = JSON.parse(jsonMatch[0]);
+            let questionHtml = `<div class="card"><h3>${t('questionLabel')} ${questionNumber}/${totalQuestions}</h3><p>${questionData.question}</p></div>`; // Use translated "Question"
+            appendMessage('ai', questionHtml);
+            clearInputArea();
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'action-button';
+                button.textContent = option; // This should now contain the full translated option
+                button.onclick = () => { appendMessage('user', option); checkTestAnswer(index, questionData.correctAnswer); };
+                userInputArea.appendChild(button);
+            });
+        } catch (error) {
+            console.error("Failed to parse question JSON:", error, "Raw response:", rawResponse);
+            appendMessage('ai', t('apiError'));
+            addButton('mainMenu', startConversation);
+        }
+    }
+    function checkTestAnswer(selectedIndex, correctIndex) {
+        if (selectedIndex === correctIndex) testScore++;
+        questionNumber++;
+        if (questionNumber > totalQuestions) finishLevelTest();
+        else askTestQuestion();
+    }
+    async function finishLevelTest() {
+        clearInputArea();
+        appendMessage('ai', t('levelTestResult'));
+        let recommendation, recommendedCourse;
+        if (testScore <= 1) {
+            recommendation = t('levelCompleteBeginner');
+            recommendedCourse = data.courses["Normal Class"].find(c => c.level.en === 'Basic');
+        } else {
+            const level = testScore === 2 ? 'Level 2' : 'Level 3';
+            recommendation = t('levelRecommendation', level);
+            recommendedCourse = data.courses["Normal Class"].find(c => c.level.en === level);
+        }
+        appendMessage('ai', recommendation);
+        if (recommendedCourse) addButton('viewCourse', () => showCourseResult(recommendedCourse));
+        addButton('mainMenu', startConversation);
+    }
+    // --- CONVERSATION & CULTURE FLOWS ---
+    function startConversationPractice() {
+        conversationState.lastTopic = 'Conversation Practice'; // Set topic
+        chatLog.innerHTML = ''; // Clear chat log to start fresh for practice
+        clearInputArea();
+        appendMessage('ai', t('practiceIntro'));
+        // Buttons now use translated text from the `translations` object
+        addButton('practiceScenarioFood', () => handleScenario('Food'));
+        addButton('practiceScenarioTaxi', () => handleScenario('Taxi'));
+        addButton('practiceScenarioDirections', () => handleScenario('Directions'));
+        addButton('goBack', startConversation);
+    }
+    // --- NEW/MODIFIED FOR PROCEED BUTTON IN CONVERSATION PRACTICE ---
+    let currentScenarioStep = 0; // Track steps in a scenario preview
+    const scenarioPreviewSteps = {
+        Food: [
+            { ai: { thai_script: "สวัสดีค่ะ รับอะไรดีคะ?", transliteration: "Sawasdee ka, rap arai dee ka?", translation: "Hello, what would you like?" }, user_reply: "I would like to order Pad Thai with fresh shrimp, please." },
+            { ai: { thai_script: "รับอะไรเพิ่มไหมคะ?", transliteration: "Rap arai perm mai ka?", translation: "Anything else?" }, user_reply: "No, thank you." }
+        ],
+        Taxi: [
+            { ai: { thai_script: "ไปไหนครับ?", transliteration: "Pai nai krap?", translation: "Where are you going?" }, user_reply: "To Siam Paragon, please." },
+            { ai: { thai_script: "โอเคครับ ไปเลยไหมครับ?", transliteration: "Okay krap, pai loey mai krap?", translation: "Okay, let's go?" }, user_reply: "Yes, let's go." }
+        ],
+        Directions: [
+            { ai: { thai_script: "ขอโทษนะครับ มีอะไรให้ช่วยไหมครับ?", transliteration: "Khothot na krap, mee arai hai chuay mai krap?", translation: "Excuse me, can I help you?" }, user_reply: "Excuse me, which way is it to Wat Arun?" },
+            { ai: { thai_script: "วัดอรุณไปทางนี้ครับ", transliteration: "Wat Arun pai tang nee krap", translation: "Wat Arun is this way." }, user_reply: "Thank you very much." }
+        ]
+    };
+
+    async function handleScenario(scenarioKey) {
+        conversationState.lastTopic = `Conversation Practice: ${scenarioKey}`; // Set topic
+        clearInputArea();
+        appendMessage('ai', t('practiceSoon'));
+        currentScenarioStep = 0; // Reset step for new scenario
+
+        // Display the first AI message of the scenario
+        displayNextScenarioStep(scenarioKey);
+    }
+
+    function displayNextScenarioStep(scenarioKey) {
+        const scenario = scenarioPreviewSteps[scenarioKey];
+        if (currentScenarioStep < scenario.length) {
+            const step = scenario[currentScenarioStep];
+            const convoHtml = `<div class="card"><p><em>${step.ai.thai_script}</em><br>(${step.ai.transliteration})<br>"${step.ai.translation}"</p></div>`;
+            appendMessage('ai', convoHtml);
+            appendMessage('ai', t('howToReply'));
+
+            // Show the proceed button
+            const proceedButton = document.getElementById('proceedButton');
+            if (proceedButton) {
+                proceedButton.style.display = 'flex'; // Make it visible
+                proceedButton.onclick = () => {
+                    appendMessage('user', scenario[currentScenarioStep].user_reply); // Simulate user reply
+                    proceedButton.style.display = 'none'; // Hide button after click
+                    currentScenarioStep++;
+                    if (currentScenarioStep < scenario.length) {
+                        displayNextScenarioStep(scenarioKey); // Show next AI message
+                    } else {
+                        // End of scenario preview
+                        appendMessage('ai', "End of preview. To continue full role-play, please enroll!");
+                        addButton('mainMenu', startConversation);
+                    }
+                };
+            }
+        } else {
+            // This else block handles if there are no steps or if it somehow goes out of bounds
+            appendMessage('ai', "Scenario preview finished.");
+            addButton('mainMenu', startConversation);
+        }
+    }
+    // --- END NEW/MODIFIED FOR PROCEED BUTTON ---
+
+    // Renamed and repurposed startCulturalCompass
+    function startCulturalCompassChatbot() {
+        conversationState.lastTopic = 'Cultural Inquiry'; // Set topic
+        // Clear chat log to start a fresh interaction for the cultural bot
+        chatLog.innerHTML = '';
+        clearInputArea();
+        // Use the new translated greeting from schoolInfo
+        appendMessage('ai', schoolInfo.culturalIntroBotGreeting[currentLanguage]);
+        handleFreeformQuestion(); // Use the existing freeform input for interaction
+    }
+    function handleFreeformQuestion(introMessage) { // introMessage is optional
+        clearInputArea();
+        // Only append intro message if it's provided, prevents re-adding for subsequent questions
+        if (introMessage) appendMessage('ai', introMessage);
+        const inputContainer = document.createElement('div');
+        inputContainer.id = 'freeform-input-container';
+        inputContainer.style.display = 'flex';
+        const textInput = document.createElement('input');
+        textInput.type = 'text';
+        textInput.id = 'freeform-input';
+        textInput.placeholder = t('typeQuestion');
+        textInput.onkeydown = (e) => { if (e.key === 'Enter') submitFreeformQuestion(); };
+        const sendButton = document.createElement('button');
+        sendButton.className = 'action-button';
+        sendButton.textContent = t('send');
+        sendButton.onclick = submitFreeformQuestion;
+        inputContainer.appendChild(textInput);
+        inputContainer.appendChild(sendButton);
+        userInputArea.appendChild(inputContainer);
+        textInput.focus();
+    }
+    function showContactInfo() {
+        conversationState.lastTopic = 'Contact Info'; // Set topic
+        clearInputArea();
+        chatLog.innerHTML = ''; // Clear the chat window for the new card
+        const contactCardHtml = `
+            <div class="card">
+                <h3>${t('contactUsTitle')}</h3>
+                <p><strong>${t('schoolAddressLabel')}:</strong> ${schoolInfo.address[currentLanguage]}</p>
+                <p><strong>${t('schoolPhoneLabel')}:</strong> ${schoolInfo.phone}</p>
+                <p><strong>${t('schoolEmailLabel')}:</strong> ${schoolInfo.email}</p>
+                <p><strong>${t('schoolHoursLabel')}:</strong> ${schoolInfo.businessHours[currentLanguage]}</p>
+            </div>
+        `;
+        appendMessage('ai', contactCardHtml);
+        appendMessage('ai', t('anythingElse'));
+        addButton('mainMenu', startConversation);
+    }
+    async function submitFreeformQuestion() {
+        const input = document.getElementById('freeform-input');
+        const userQuestion = input.value.trim();
+        if (!userQuestion) return;
+        appendMessage('user', userQuestion);
+        input.value = ''; // Clear input field immediately after sending
+        // Enhanced prompt for the cultural chatbot
+        const prompt = `You are a highly knowledgeable and friendly AI Chatbot with extensive expertise in both Thai and Myanmar cultures, history, and daily life. You are also the AI Concierge for "OKay Thai Language Center".
+        When answering, integrate your knowledge of the language center (courses, prices, lecturers, location) if relevant, otherwise focus on culture, history, or general information about Thailand and Myanmar.
+        The user asked: "${userQuestion}".
+        Provide a detailed, helpful, and engaging answer in ${currentLanguage}.
+        Internal Data: Courses: Normal, Children, Basic Speaking, Private classes online. Prices: Basic courses start at MMK 149,000. Lecturers: All are experienced Myanmar nationals who graduated from Yangon University of Foreign Languages with a Thai major. Location: All classes are online.`;
+        const aiResponse = await callGeminiAPI(prompt);
+        appendMessage('ai', aiResponse.replace(/\n/g, '<br>'));
+        appendMessage('ai', t('anythingElse'));
+        addButton('askAnother', () => handleFreeformQuestion(t('anythingElse')));
+        addButton('talkToHuman', requestHumanContact); // Add "Talk to Human" button
+        addButton('mainMenu', startConversation);
+    }
+    // --- DATA STORE ---
+    const data = {
+        courses: {
+            "Normal Class": [
+                { id: 'normal-basic', name: {en: 'Normal Class - Basic', mm: '  သာမန်တန်း   -   အခြေခံ  ', th: '  คลาสปกติ   -   พื้นฐาน  '}, level: {en: 'Basic', mm: '  အခြေခံ  ', th: '  พื้นฐาน  '}, duration: '2 months', price: 'MMK 149,000', teaching: {en: 'Comprehensive online lessons focusing on foundational Thai grammar and vocabulary.', mm: '  အခြေခံထိုင်းသဒ္ဒါနှင့်     ဝေါဟာရကို     အဓိကထားသော     ပြည့်စုံသောအွန်လိုင်းသင်ခန်းစာများ။  ', th: '  บทเรียนออนไลน์ที่ครอบคลุมเน้นไวยากรณ์และคำศัพท์ภาษาไทยพื้นฐาน  '} },
+                { id: 'normal-level2', name: {en: 'Normal Class - Level 2', mm: '  သာမန်တန်း   -   အဆင့်     ၂  ', th: '  คลาสปกติ   -   ระดับ   2'}, level: {en: 'Level 2', mm: '  အဆင့်     ၂  ', th: '  ระดับ   2'}, duration: '2 months', price: 'MMK 200,000', teaching: {en: 'Expands grammar, vocabulary, and practical conversations for daily life.', mm: '  နေ့စဉ်ဘဝအတွက်     သဒ္ဒါ၊   ဝေါဟာရနှင့်     လက်တွေ့စကားပြောစွမ်းရည်များ     တိုးချဲ့သင်ကြားခြင်း။  ', th: '  ขยายไวยากรณ์     คำศัพท์     และการสนทนาเชิงปฏิบัติสำหรับชีวิตประจำวัน  '} },
+                { id: 'normal-level3', name: {en: 'Normal Class - Level 3', mm: '  သာမန်တန်း   -   အဆင့်     ၃  ', th: '  คลาสปกติ   -   ระดับ   3'}, level: {en: 'Level 3', mm: '  အဆင့်     ၃  ', th: '  ระดับ   3'}, duration: '3 months', price: 'MMK 300,000', teaching: {en: 'Advanced grammar, situational dialogues, and deeper cultural nuances.', mm: '  အဆင့်မြင့်သဒ္ဒါ၊   အခြေအနေအလိုက်စကားပြောဆိုမှုများနှင့်     ယဉ်ကျေးမှုဆိုင်ရာ     နက်နဲမှုများ။  ', th: '  ไวยากรณ์ขั้นสูง     บทสนทนาตามสถานการณ์     และความแตกต่างทางวัฒนธรรมที่ลึกซึ้งยิ่งขึ้น  '} }
+            ],
+            "Children Class": [
+                { id: 'children-basic', name: {en: 'Children Class - Basic', mm: '  ကလေးတန်း   -   အခြေခံ  ', th: '  คลาสเด็ก   -   พื้นฐาน  '}, level: {en: 'Basic', mm: '  အခြေခံ  ', th: '  พื้นฐาน  '}, duration: '2 months', price: 'MMK 149,000', teaching: {en: 'Fun and interactive lessons designed for young learners.', mm: '  ပျော်စရာကောင်းပြီး     အပြန်အလှန်တုံ့ပြန်မှုရှိသော     သင်ခန်းစာများ။  ', th: '  บทเรียนที่สนุกสนานและโต้ตอบได้ซึ่งออกแบบมาสำหรับผู้เรียนรุ่นเยาว์  '} },
+                { id: 'children-level2', name: {en: 'Children Class - Level 2', mm: '  ကလေးတန်း   -   အဆင့်     ၂  ', th: '  คลาสเด็ก   -   ระดับ   2'}, level: {en: 'Level 2', mm: '  အဆင့်     ၂  ', th: '  ระดับ   2'}, duration: '2 months', price: 'MMK 200,000', teaching: {en: 'Engaging activities to expand vocabulary and simple sentence structures.', mm: '  ဝေါဟာရနှင့်     ရိုးရှင်းသောဝါကျတည်ဆောက်ပုံများကို     တိုးချဲ့ရန်အတွက်     ဆွဲဆောင်မှုရှိသော     လှုပ်ရှားမှုများ။  ', th: '  กิจกรรมที่มีส่วนร่วมเพื่อขยายคำศัพท์และโครงสร้างประโยคง่ายๆ  '} }
+            ],
+            "Basic Speaking Class": [
+                { id: 'basic-speaking', name: {en: 'Basic Speaking Class', mm: '  အခြေခံစကားပြောတန်း  ', th: '  คลาสพูดพื้นฐาน  '}, level: {en: 'N/A', mm: 'N/A', th: 'N/A'}, duration: '2 months', price: 'MMK 149,000', teaching: {en: 'Intensive focus on everyday conversational Thai and practical phrases.', mm: '  နေ့စဉ်သုံး     ထိုင်းစကားပြောနှင့်     လက်တွေ့အသုံးဝင်သော     စကားစုများကို     အထူးအာရုံစိုက်ခြင်း။  ', th: '  เน้นการสนทนาภาษาไทยในชีวิตประจำวันและวลีที่ใช้ได้จริง  '} }
+            ],
+            "Private Class": [
+                { id: 'private', name: {en: 'Private Class (Customized)', mm: '  သီးသန့်သင်တန်း   (  စိတ်ကြိုက်  )', th: '  คลาสส่วนตัว   (  กำหนดเอง  )'}, level: {en: 'N/A', mm: 'N/A', th: 'N/A'}, duration: 'Varies', price: 'Varies', teaching: {en: 'Personalized 1-on-1 sessions tailored to your specific goals and schedule.', mm: '  သင်၏     သီးခြားပန်းတိုင်များနှင့်     အချိန်ဇယားအတိုင်း     စိတ်ကြိုက်ပြုလုပ်ထားသော     တစ်ဦးချင်းသင်ခန်းစာများ။  ', th: '  เซสชันแบบตัวต่อตัวที่ปรับให้เหมาะกับเป้าหมายและตารางเวลาเฉพาะของคุณ  '} }
+            ]
+        },
+        faqs: [
+            { category: 'Course Information', question: {en: 'What types of classes do you offer?', mm: '  ဘယ်လိုသင်တန်းအမျိုးအစားတွေ     ပေးပါသလဲ။  ', th: '  มีคลาสประเภทใดบ้าง  '}, answer: {en: 'We offer: 1. Thai Speaking Only Class, 2. Thai 4 skills class, 3. One On One Thai Class, 4. Private group class, 5. Children\'s group class (5 students), 6. Private children\'s class.', mm: 'Okay Thai Language Center   တွင်     ၁  .  ထိုင်းအခြေခံစကားပြောသီးသန်   ( Thai Speaking Only Class)   ၂  .  ထိုင်းအခြေခံ     အရေးအဖတ်အပြောနားထောင်   ( Thai 4 skills class)   ၃  .  တစ်ဦးချင်းသီးသန့်ထိုင်းဘာသာသင်တန်း   ( One On One Thai Class )   ၄  .  သီးသန့်   private group   အတန်း     ၅  .  ထိုင်းကလေးသီးသန့်     ၅ယောက်တစ်ဖွဲ့     အတန်း     ၆  .  ကလေးတစ်ဦးချင်းသီးသန့်အတန်း  ', th: '  ที่   OKay Thai Language Center   มี  : 1.   คลาสเรียนพูดภาษาไทยเท่านั้น   2.   คลาส   4   ทักษะภาษาไทย   3.   คลาสเรียนภาษาไทยตัวต่อตัว   4.   คลาสกลุ่มส่วนตัว   5.   คลาสกลุ่มเด็ก   (5   คน  ) 6.   คลาสส่วนตัวสำหรับเด็ก  '} },
+            { category: 'Teaching Method', question: {en: 'Who are the instructors?', mm: '  ဘယ်သူတွေသင်ကြားပေးမှာလဲ  ', th: '  ใครเป็นผู้สอน  '}, answer: {en: 'Teachers who have graduated with a major in Thai from the Yangon University of Foreign Languages will provide systematic instruction from the basics.', mm: '  ရန်ကုန်နိုင်ငံခြားဘာသာတက္ကသိုလ်မှ     ထိုင်းဘာသာအထူးပြုဖြင့်     ဘွဲ့ရထားသော     ဆရာ၊ဆရာမများမှ     အခြေခံမှစပြီး     စနစ်တကျသင်ကြားပေးပါတယ်ရှင့်  ', th: '  ครูที่สำเร็จการศึกษา   chuyên ngành  ภาษาไทยจากมหาวิทยาลัยภาษาต่างประเทศย่างกุ้งจะสอนอย่างเป็นระบบตั้งแต่พื้นฐาน  '} },
+            { category: 'Course Information', question: {en: 'Are there different levels in Thai language?', mm: '  ထိုင်းဘာသာမှာ   Level   ခွဲထားတာရှိလား  ', th: '  ภาษาไทยมีระดับต่างๆ     หรือไม่  '}, answer: {en: 'In our school, the basic 4 skills class has 3 levels: Level 1, 2, and 3. The Thai speaking class is only offered at the basic level.', mm: '  ညီမတို့     သင်တန်းကျောင်းမှာ     အခြေခံ   4 skills   ကတော့   Level 1,2,3   ဆိုပြီး   3   ဆင့်ရှိပါတယ်ရှင့်     ထိုင်းစကားပြောအတန်းလေးကတော့      အခြေခံအတန်လေးဘဲဖွင့်ထားပါတယ်ရှင့်  ', th: '  ที่โรงเรียนของเรา     คลาส   4   ทักษะพื้นฐานมี   3   ระดับคือ     ระดับ   1, 2   และ   3   ส่วนคลาสพูดภาษาไทยเปิดสอนเฉพาะระดับพื้นฐานเท่านั้น  '} },
+            { category: 'Teaching Method', question: {en: 'How are the classes taught?', mm: '  ဘယ်ကနေ     သင်ကြားပေးမှာလဲ  ', th: '  สอนอย่างไร  '}, answer: {en: 'We teach directly face-to-face with the teacher via the Zoom app. Before the class starts, a group is created on Telegram with the teacher. After the class, the video recording of the lesson is sent back to the Telegram group. If you miss a class for any reason, you can re-watch the video recordings.', mm: 'Zoom app   ကနေ     ဆရာမနဲ့   face to face   တိုက်ရိုက်သင်ပေးတာပါရှင့်     အတန်းမစခင်     ဆရာမနဲ့   Telegram   မှာ   group   ဖွဲ့ပေးထားပြီး     အတန်းချိန်ပြီးသွားတာနဲ့     သင်ထားတဲ့   video recording   ကို   Telegram group   ထဲမှာ     ပြန်ပို့ပေးပါတယ်ရှင့်     အကြောင်းတစ်စုံတစ်ရာကြောင့်     အတန်းပျက်ခဲ့လျှင်   video recording   များကို     ပြန်လည်ကြည့်ရူနိုင်ပါတယ်ရှင့်  ', th: '  เราสอนแบบเห็นหน้ากับครูโดยตรงผ่านแอป   Zoom   ก่อนเริ่มเรียนจะมีการสร้างกลุ่มใน   Telegram   กับครู     หลังจากเรียนเสร็จแล้ว     วิดีโอบันทึกการสอนจะถูกส่งกลับไปในกลุ่ม   Telegram   หากคุณขาดเรียนด้วยเหตุผลใดก็ตาม     คุณสามารถดูวิดีโอบันทึกย้อนหลังได้  '} },
+            { category: 'Fees', question: {en: 'How much is the course fee?', mm: '  သင်တန်းကြေး     ဘယ်လောက်လဲ  ', th: '  ค่าเล่าเรียนเท่าไหร่  '}, answer: {en: 'The regular course fee is 149,000 MMK. With the rainy season promotion of a 20,000 MMK discount, it will only cost 129,000 MMK.', mm: '  ပုံမှန်သင်တန်းကြေးက     မြန်မာငွေ     ၁၄၉  ,  ၀၀၀     ကျပ်     ပါရှင့်     မိုးရာသီပရိုမိုရှင်း     ၂၀  ,  ၀၀၀ကျပ်   discount   လေးရှိလို့     ၁၂၉  ,  ၀၀၀     ကျပ်သာကျသင့်ပါမယ်ရှင့်  ', th: '  ค่าเล่าเรียนปกติคือ   149,000   จ๊าด     พร้อมโปรโมชั่นฤดูฝนลด   20,000   จ๊าด     จะเหลือเพียง   129,000   จ๊าดเท่านั้น  '} }
+        ],
+        lecturers: [
+            { name: "TR. ZAW", photoUrl: "images/Zaw.png", qualification: {en: "B.A (Q,Thai, YUFL)", mm: "B.A (Q,Thai, YUFL)", th: "B.A (Q,Thai, YUFL)"}, workExperience: {en: "3 years working experiences in Thai Company", mm: "  ထိုင်းကုမ္ပဏီတွင်     ၃     နှစ်အလုပ်လုပ်ကိုင်ခဲ့သော     အတွေ့အကြုံ  ", th: "  ประสบการณ์การทำงาน   3   ปีในบริษัทไทย  "}, teachingExperience: {en: "5 years teaching experiences", mm: "  ၅     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   5   ปี  "} },
+            { name: "TR. PHYU", photoUrl: "images/Phyu.png", qualification: {en: "B.A (Thai, YUFL)", mm: "B.A (Thai, YUFL)", th: "B.A (Thai, YUFL)"}, workExperience: {en: "Thai Translator and Interpreter in Toyota Company", mm: "Toyota   ကုမ္ပဏီတွင်     ထိုင်းဘာသာပြန်နှင့်     စကားပြန်  ", th: "  นักแปลและล่ามภาษาไทยในบริษัทโตโยต้า  "}, teachingExperience: {en: "2 years teaching experiences", mm: "  ၂     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   2   ปี  "} },
+            { name: "TR. SHWE", photoUrl: "images/Shwe.png", qualification: {en: "B.A (Q,Thai, YUFL)", mm: "B.A (Q,Thai, YUFL)", th: "B.A (Q,Thai, YUFL)"}, workExperience: {en: "Thai translator and interpreter in Golden Sea MyanmarCo.,Ltd", mm: "Golden Sea Myanmar Co.,Ltd   တွင်     ထိုင်းဘာသာပြန်နှင့်     စကားပြန်  ", th: "  นักแปลและล่ามภาษาไทยใน   Golden Sea Myanmar Co.,Ltd"}, teachingExperience: {en: "2 years teaching experiences", mm: "  ၂     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   2   ปี  "} },
+            { name: "TR. MAY", photoUrl: "images/May.png", qualification: {en: "B.A (Q,Thai, YUFL)", mm: "B.A (Q,Thai, YUFL)", th: "B.A (Q,Thai, YUFL)"}, workExperience: {en: "3 years working experiences in Thai Company", mm: "  ထိုင်းကုမ္ပဏီတွင်     ၃     နှစ်အလုပ်လုပ်ကိုင်ခဲ့သော     အတွေ့အကြုံ  ", th: "  ประสบการณ์การทำงาน   3   ปีในบริษัทไทย  "}, teachingExperience: {en: "2 years teaching experiences", mm: "  ၂     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   2   ปี  "} },
+            { name: "TR. HTOO", photoUrl: "images/Htoo.png", qualification: {en: "B.A (Q,Thai, YUFL)", mm: "B.A (Q,Thai, YUFL)", th: "B.A (Q,Thai, YUFL)"}, workExperience: {en: "Freelance Thai Translator and Interpreter", mm: "  အလွတ်တန်း     ထိုင်းဘာသာပြန်နှင့်     စကားပြန်  ", th: "  นักแปลและล่ามภาษาไทยอิสระ  "}, teachingExperience: {en: "2 years teaching experience", mm: "  ၂     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   2   ปี  "} },
+            { name: "TR. PHUE", photoUrl: "images/Phue.png", qualification: {en: "B.A (Q,Thai, YUFL)", mm: "B.A (Q,Thai, YUFL)", th: "B.A (Q,Thai, YUFL)"}, workExperience: {en: "Freelance Thai Translator and Interpreter", mm: "  အလွတ်တန်း     ထိုင်းဘာသာပြန်နှင့်     စကားပြန်  ", th: "  นักแปลและล่า มဘာသာ ไทยอิ is ระ  "}, teachingExperience: {en: "2 years teaching experiences", mm: "  ၂     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   2   ปี  "} },
+            { name: "TR. SAKAR", photoUrl: "images/Sakar.png", qualification: {en: "B.A (Q,Thai, YUFL)", mm: "B.A (Q,Thai, YUFL)", th: "B.A (Q,Thai, YUFL)"}, workExperience: {en: "1 year working experience in Thai Company", mm: "  ထိုင်းကုမ္ပဏီတွင်     ၁     နှစ်အလုပ်လုပ်ကိုင်ခဲ့သော     အတွေ့အကြုံ  ", th: "  ประสบการณ์การทำงาน   1   ปีในบริษัทไทย  "}, teachingExperience: {en: "1 year teaching experience", mm: "  ၁     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   1   ปี  "} },
+            { name: "TR. SEINN", photoUrl: "images/Seinn.png", qualification: {en: "B.A (Q,Thai, YUFL)", mm: "B.A (Q,Thai, YUFL)", th: "B.A (Q,Thai, YUFL)"}, workExperience: {en: "Freelance Thai Translator and Interpreter", mm: "  အလွတ်တန်း     ထိုင်းဘာသာပြန်နှင့်     စကားပြန်  ", th: "  นักแปลและล่ามภาษาไทยอิสระ  "}, teachingExperience: {en: "3 years teaching experience", mm: "  ၃     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   3   ปี  "} },
+            { name: "TR. HSU", photoUrl: "images/Hsu.png", qualification: {en: "B.A (Thai, YUFL)", mm: "B.A (Thai, YUFL)", th: "B.A (Thai, YUFL)"}, workExperience: {en: "Thai Linguist 1 year", mm: "  ထိုင်းဘာသာဗေဒပညာရှင်     ၁     နှစ်  ", th: "  นักภาษาศาสตร์ไทย   1   ปี  "}, teachingExperience: {en: "5 years teaching experience", mm: "  ၅     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   5   ปี  "} },
+            { name: "TR. PHYU", photoUrl: "images/Phyu2.png",qualification: {en: "B.A (Thai, YUFL)", mm: "B.A (Thai, YUFL)", th: "B.A (Thai, YUFL)"}, workExperience: {en: "Freelance Thai Translator and Interpreter", mm: "  အလွတ်တန်း     ထိုင်းဘာသာပြန်နှင့်     စကားပြန်  ", th: "  นักแปลและล่ามภาษาไทยอิสระ  "}, teachingExperience: {en: "1 year teaching experience", mm: "  ၁     နှစ်သင်ကြားရေးအတွေ့အကြုံ  ", th: "  ประสบการณ์การสอน   1   ปี  "} }
+        ]
+    };
+    // Function to populate the sidebar navigation
+    // --- MODIFIED: Added 'enrollmentInquiry' button ---
+    function populateSidebarNav() {
+        sidebarNav.innerHTML = ''; // Clear existing buttons
+        addButton('culturalCompass', startCulturalCompassChatbot, sidebarNav, '  💬  ');
+        addButton('findCourse', showCourseOptions, sidebarNav, '  📚  ');
+        addButton('meetLecturers', showLecturers, sidebarNav, '  🧑‍🏫  ');
+        addButton('askQuestion', showFaqOptions, sidebarNav, '  ❓  ');
+        addButton('findLevel', startLevelTest, sidebarNav, '  🧠  ');
+        addButton('conversationPractice', startConversationPractice, sidebarNav, '  🗣️  ');
+        addButton('contactUsTitle', showContactInfo, sidebarNav, '  📞  ');
+        addButton('enrollmentInquiry', showEnrollmentLeadForm, sidebarNav, '  📝  '); // NEW BUTTON
+        addButton('mainMenu', startConversation, sidebarNav, '  🏠  ');
+    }
+    // --- END MODIFIED ---
+
+    // New: Play greeting sound using Web Speech API
+    function playGreetingSound() {
+        const utterance = new SpeechSynthesisUtterance();
+        let greetingText;
+        let langCode;
+        if (currentLanguage === 'th') {
+            greetingText = ' สวัสดีค่ะ ';
+            langCode = 'th-TH';
+        } else if (currentLanguage === 'mm') {
+            greetingText = ' မင်္ဂလာပါ ';
+            langCode = 'my-MM'; // Myanmar language code, may have limited browser support
+        } else { // Default to English
+            greetingText = 'Hello';
+            langCode = 'en-US';
+        }
+        utterance.text = greetingText;
+        utterance.lang = langCode;
+        // Optional: Select a specific voice if available
+        const voices = speechSynthesis.getVoices();
+        const selectedVoice = voices.find(voice => voice.lang === langCode) || voices.find(voice => voice.lang.startsWith(langCode.substring(0, 2)));
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        } else {
+            console.warn(`Voice for ${langCode} not found, using default.`);
+        }
+        speechSynthesis.speak(utterance);
+    }
+    // --- APP INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        currentLanguage = loadFromStorage('okayThaiLang', 'en');
+        currentTheme = loadFromStorage('okayThaiTheme', 'theme-default');
+        setTheme(currentTheme);
+        updateSettingsUI();
+        // Event listeners for settings panels
+        document.getElementById('langBtn').addEventListener('click', () => openPanel('language-panel'));
+        document.getElementById('themeBtn').addEventListener('click', () => openPanel('theme-panel'));
+        document.getElementById('closeLangBtn').addEventListener('click', () => closePanel('language-panel'));
+        document.getElementById('closeThemeBtn').addEventListener('click', () => closePanel('theme-panel'));
+        // Event listeners for language/theme options
+        document.querySelectorAll('#language-options .option-btn').forEach(btn => {
+            btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+        });
+        document.querySelectorAll('#theme-options .option-btn').forEach(btn => {
+            btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+        });
+        // Sidebar collapse functionality
+        collapseBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            updateSettingsUI(); // Update button text/icon and greeting button title
+        });
+        // Greeting sound button
+        greetingBtn.addEventListener('click', playGreetingSound);
+        createStars();
+        populateSidebarNav(); // Populate sidebar on load
+        startConversation(); // Start the conversation in the main chat window
+    });
+</script>
 </body>
 </html>
