@@ -1205,8 +1205,7 @@
 
         // --- IMPORTANT: REPLACE WITH YOUR ACTUAL BACKEND API ENDPOINT ---
         // This is a placeholder. Your backend server needs to be running and accessible at this URL.
-        const backendEndpoint = 'http://localhost:3000/leads'; // Example: if your backend runs locally on port 3000
-
+        const backendEndpoint = 'http://127.0.0.1:3000/leads'; // Changed from localhost to 127.0.0.1
         try {
             const response = await fetch(backendEndpoint, {
                 method: 'POST',
