@@ -2,7 +2,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials
+from firebase_admin import firestore
 import datetime
 import os
 import json # Import json module to parse the environment variable
@@ -19,8 +20,14 @@ try:
     # For local testing without setting an env var, you can temporarily
     # uncomment the line below and comment out the os.environ.get line.
     # Make sure 'firebase-adminsdk.json' is in the same directory as this script.
-    # with open('firebase-adminsdk.json', 'r') as f:
-    #     service_account_json_str = f.read()
+    if not service_account_json_str: # Only try to read from file if env var is not set
+        try:
+            with open('firebase-adminsdk.json', 'r') as f:
+                service_account_json_str = f.read()
+            print("Using firebase-adminsdk.json file for local credentials.")
+        except FileNotFoundError:
+            raise ValueError("FIREBASE_ADMIN_SDK_CONFIG environment variable not set and firebase-adminsdk.json not found.")
+
 
     if not service_account_json_str:
         raise ValueError("FIREBASE_ADMIN_SDK_CONFIG environment variable not set. Cannot initialize Firebase.")
