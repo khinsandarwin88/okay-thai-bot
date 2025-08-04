@@ -1199,11 +1199,35 @@
         const phone = document.getElementById('lead-phone').value.trim();
         const interestedCourse = document.getElementById('lead-course-interest').value;
 
+        // --- NEW VALIDATION LOGIC ---
+        // Name validation: checks for special characters
+        const nameRegex = /^[A-Za-z\s]+$/;
+        if (!nameRegex.test(name)) {
+            alert('Please enter a valid name without special characters.');
+            return;
+        }
+
+        // Email validation: checks for a basic email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (email && !emailRegex.test(email)) {
+            alert('Please enter a valid email address (e.g., example@email.com).');
+            return;
+        }
+
+        // Phone number validation: checks for digits and common phone symbols
+        const phoneRegex = /^[0-9\s-()]+$/;
+        if (phone && !phoneRegex.test(phone)) {
+            alert('Please enter a valid phone number with digits only.');
+            return;
+        }
+
+        // Original check for required fields
         if (!name || (!email && !phone)) {
             alert('Please provide your Name and at least an Email or Phone Number.');
             return;
         }
-        
+        // --- END NEW VALIDATION LOGIC ---
+
         // Simulate a successful submission without a backend call
         appendMessage('user', `Name: ${name}, Email: ${email || 'N/A'}, Phone: ${phone || 'N/A'}, Course: ${interestedCourse || 'N/A'}`);
         appendMessage('ai', t('contactSubmitted'));
