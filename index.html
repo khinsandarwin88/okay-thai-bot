@@ -1493,12 +1493,21 @@
         appendMessage('user', userQuestion);
         input.value = ''; // Clear input field immediately after sending
         // Enhanced prompt for the cultural chatbot
-        const prompt = `You are a highly knowledgeable and friendly AI Chatbot with extensive expertise in both Thai and Myanmar cultures, history, and daily life. You are also the AI Concierge for "OKay Thai Language Center".
-        When answering, integrate your knowledge of the language center (courses, prices, lecturers, location) if relevant, otherwise focus on culture, history, or general information about Thailand and Myanmar.
+        const prompt = `You are a highly knowledgeable and friendly AI Chatbot with extensive expertise in both Thai and Myanmar cultures, history, and daily life.
+        You are also the AI Concierge for "OKay Thai Language Center".
+
+        When answering, please follow these rules:
+        1. If the user's question is directly related to Thai or Myanmar cultures, history, or the OKay Thai Language Center, provide a detailed, helpful, and engaging answer.
+        2. If the user's question is NOT related to these topics, please acknowledge this first with a polite and friendly phrase like: "That's a great question, though it's not directly related to Thai or Myanmar culture, which is my primary focus. However, I would be delighted to help you with it."
+        3. After this polite acknowledgment, provide a helpful and informative answer to their question.
+
         The user asked: "${userQuestion}".
         Provide a detailed, helpful, and engaging answer in ${currentLanguage}.
-        Internal Data: Courses: Normal, Children, Basic Speaking, Private classes online. Prices: Basic courses start at MMK 149,000. Lecturers: All are experienced Myanmar nationals who graduated from Yangon University of Foreign Languages with a Thai major. Location: All classes are online.`;
-        const aiResponse = await callGeminiAPI(prompt);
+
+        Internal Data:
+        - Courses: Normal, Children, Basic Speaking, Private classes online. Prices: Basic courses start at MMK 149,000.
+        - Lecturers: All are experienced Myanmar nationals who graduated from Yangon University of Foreign Languages with a Thai major.
+        - Location: All classes are online.`;
         appendMessage('ai', aiResponse.replace(/\n/g, '<br>'));
         appendMessage('ai', t('anythingElse'));
         addButton('askAnother', () => handleFreeformQuestion(t('anythingElse')));
