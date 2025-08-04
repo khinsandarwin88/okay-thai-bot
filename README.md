@@ -2,7 +2,7 @@ Okay Thai Bot - Your AI Language Buddy
 A friendly, AI-powered chatbot designed to help you discover the rich cultures of Thailand and Myanmar and find the perfect language course. This bot acts as a digital concierge for the Okay Thai Language Center, providing information and interactive tools in a simple, engaging way.
 
 🌐 Live Demo
-You can view a live demonstration of the bot on GitHub Pages here: Okay Thai Bot Live Demo
+You can view a live demonstration of the bot on GitHub Pages here: [Okay Thai Bot Live Demo](https://khinsandarwin88.github.io/BetaProtoype/)
 
 ✨ Key Features
 AI Cultural Compass: Ask questions about traditions, festivals, food, and history for both Thailand and Myanmar.
