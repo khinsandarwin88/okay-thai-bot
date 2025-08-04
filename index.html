@@ -974,10 +974,26 @@
     function appendMessage(sender, content, isLoading = false) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `chat-message ${sender}`;
-        const avatar = sender === 'ai' ? '  👩🏻 ‍ 🏫  ' : '  🧑🏻 ‍ 💻  ';
+        const avatar = sender === 'ai' ? '👩🏻‍🏫' : '🧑🏻‍💻';
         if (isLoading) messageDiv.id = 'loading-message';
         messageDiv.innerHTML = `<div class="avatar">${avatar}</div><div class="message-content">${content}</div>`;
         chatLog.appendChild(messageDiv);
+        chatLog.scrollTop = chatLog.scrollHeight;
+
+        // Save the message to local storage
+        let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+        chatHistory.push({ sender, content });
+        localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+    }
+    function loadChatHistory() {
+        const chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+        chatHistory.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${msg.sender}`;
+            const avatar = msg.sender === 'ai' ? '👩🏻‍🏫' : '🧑🏻‍💻';
+            messageDiv.innerHTML = `<div class="avatar">${avatar}</div><div class="message-content">${msg.content}</div>`;
+            chatLog.appendChild(messageDiv);
+        });
         chatLog.scrollTop = chatLog.scrollHeight;
     }
     function removeLoadingMessage() {
@@ -1177,61 +1193,32 @@
     }
 
     // Function to submit lead details to a backend
-    async function submitLeadDetails() {
+    function submitLeadDetails() {
         const name = document.getElementById('lead-name').value.trim();
         const email = document.getElementById('lead-email').value.trim();
         const phone = document.getElementById('lead-phone').value.trim();
         const interestedCourse = document.getElementById('lead-course-interest').value;
-        const conversationTag = conversationState.lastTopic || 'General Inquiry'; // Capture last known topic
 
         if (!name || (!email && !phone)) {
             alert('Please provide your Name and at least an Email or Phone Number.');
             return;
         }
-
+        
+        // Simulate a successful submission without a backend call
         appendMessage('user', `Name: ${name}, Email: ${email || 'N/A'}, Phone: ${phone || 'N/A'}, Course: ${interestedCourse || 'N/A'}`);
+        appendMessage('ai', t('contactSubmitted'));
 
-        const leadData = {
+        // The bot will now show the confirmation and the main menu button
+        clearInputArea();
+        addButton('mainMenu', startConversation);
+
+        // Optional: Log the data to the console for demonstration
+        console.log('Lead submission simulated successfully (no backend needed for GitHub Pages). Data:', {
             name: name,
             email: email,
             phone: phone,
-            interestedCourse: interestedCourse,
-            source: 'OKay Thai Bot',
-            status: 'New Lead',
-            followUpNeeded: true, // Default to true for new leads
-            conversationTag: conversationTag, // Tag based on last topic
-            timestamp: new Date().toISOString()
-        };
-
-        // --- IMPORTANT: REPLACE WITH YOUR ACTUAL BACKEND API ENDPOINT ---
-        // This is a placeholder. Your backend server needs to be running and accessible at this URL.
-        const backendEndpoint = 'http://127.0.0.1:3000/leads'; // Changed from localhost to 127.0.0.1
-        try {
-            const response = await fetch(backendEndpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // If your backend requires an API key or token, add it here:
-                    // 'Authorization': 'Bearer YOUR_BACKEND_API_KEY'
-                },
-                body: JSON.stringify(leadData)
-            });
-
-            if (response.ok) {
-                appendMessage('ai', t('contactSubmitted')); // Reuse existing translation for success
-                console.log('Lead submitted successfully:', leadData);
-            } else {
-                const errorText = await response.text();
-                appendMessage('ai', "Sorry, there was an issue submitting your details. Please try again later.");
-                console.error('Failed to submit lead to backend:', response.status, response.statusText, errorText);
-            }
-        } catch (error) {
-            appendMessage('ai', "Network error. Please check your connection and try again.");
-            console.error('Network error submitting lead:', error);
-        }
-
-        clearInputArea();
-        addButton('mainMenu', startConversation);
+            interestedCourse: interestedCourse
+        });
     }
     // --- END NEW LEAD CAPTURE FUNCTIONS ---
 
@@ -1251,7 +1238,7 @@
     }
 
     function showFaqOptions() {
-        conversationState.lastTopic = 'FAQ Inquiry'; // Set topic
+        conversationState.lastTopic = 'FAQ Inquiry';
         clearInputArea();
         appendMessage('ai', t('faqPrompt'));
         const faqTopics = [...new Set(data.faqs.map(f => f.category))];
@@ -1259,21 +1246,41 @@
             const button = document.createElement('button');
             button.className = 'action-button';
             button.textContent = topic;
-            button.onclick = () => { appendMessage('user', topic); showFaqAnswer(topic); };
+            button.onclick = () => {
+                appendMessage('user', topic);
+                showFaqQuestions(topic); // A new function to show questions
+            };
             userInputArea.appendChild(button);
         });
         addButton('goBack', startConversation);
     }
-    function showFaqAnswer(topic) {
+    // --- MODIFIED: showFaqAnswer function ---
+    function showFaqQuestions(topic) {
         clearInputArea();
+        appendMessage('ai', `Please select a question about ${topic}:`);
         const relevantFaqs = data.faqs.filter(f => f.category === topic);
-        let faqHtml = `Here are questions related to ${topic}:<br/><br/>`;
-        relevantFaqs.forEach(faq => { faqHtml += `<strong>Q: ${faq.question[currentLanguage]}</strong><br/>A: ${faq.answer[currentLanguage]}<br/><br/>`; });
+        relevantFaqs.forEach(faq => {
+            const button = document.createElement('button');
+            button.className = 'action-button';
+            button.textContent = faq.question[currentLanguage];
+            button.onclick = () => {
+                appendMessage('user', faq.question[currentLanguage]);
+                showFaqAnswer(faq);
+            };
+            userInputArea.appendChild(button);
+        });
+        addButton('goBack', showFaqOptions); // Go back to the list of topics
+    }
+    function showFaqAnswer(faq) {
+        clearInputArea();
+        const faqHtml = `<div class="card"><h3>Q: ${faq.question[currentLanguage]}</h3><p>A: ${faq.answer[currentLanguage]}</p></div>`;
         appendMessage('ai', faqHtml);
-        appendMessage('ai', t('faqFollowUp'));
-        addButton('seeOtherQuestions', showFqaOptions); // Corrected typo from showFqaOptions to showFaqOptions
+        appendMessage('ai', t('faqFollowUp')); // Ask if they need help with another topic
+        addButton('seeOtherQuestions', showFaqOptions);
         addButton('mainMenu', startConversation);
     }
+
+// --- END MODIFIED ---
     function showLecturers() {
         conversationState.lastTopic = 'Lecturer Info'; // Set topic
         clearInputArea();
@@ -1607,7 +1614,11 @@
         greetingBtn.addEventListener('click', playGreetingSound);
         createStars();
         populateSidebarNav(); // Populate sidebar on load
-        startConversation(); // Start the conversation in the main chat window
+            // NEW: Load chat history and only start a new conversation if no history exists
+        loadChatHistory();
+        if (chatLog.children.length === 0) {
+            startConversation();
+        }
     });
 </script>
 </body>
