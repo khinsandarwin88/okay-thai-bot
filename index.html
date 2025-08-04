@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OKay Thai Bot-AI Buddy</title>
+<title>OKay Thai Bot - AI Buddy</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lexend:wght@400;600&family=Pacifico;amp;family=Montserrat:wght@700&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -1508,6 +1508,7 @@
         - Courses: Normal, Children, Basic Speaking, Private classes online. Prices: Basic courses start at MMK 149,000.
         - Lecturers: All are experienced Myanmar nationals who graduated from Yangon University of Foreign Languages with a Thai major.
         - Location: All classes are online.`;
+        const aiResponse = await callGeminiAPI(prompt);
         appendMessage('ai', aiResponse.replace(/\n/g, '<br>'));
         appendMessage('ai', t('anythingElse'));
         addButton('askAnother', () => handleFreeformQuestion(t('anythingElse')));
