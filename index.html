@@ -1022,7 +1022,7 @@
     async function callGeminiAPI(prompt) {
         appendMessage('ai', t('thinking'), true);
         clearInputArea();
-        const apiKey = "AIzaSyDrplq_5met7I49eJh2khcGO9-FghFgQLg"; // Your API key would go here for external deployment
+        const apiKey = "AIzaSyDMG6a8MK1ge93ZDW_THB6ocmo2D_BjZWU"; // Your API key would go here for external deployment
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
         const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
         try {
