@@ -1,4 +1,5 @@
 Okay Thai Bot - Your AI Language Buddy
+
 A friendly, AI-powered chatbot designed to help you discover the rich cultures of Thailand and Myanmar and find the perfect language course. This bot acts as a digital concierge for the Okay Thai Language Center, providing information and interactive tools in a simple, engaging way.
 
 🌐 Live Demo
